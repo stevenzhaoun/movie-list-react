@@ -10,7 +10,6 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import StarIcon from '@material-ui/icons/Star';
 import { Box } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 
 
 const useStyles = makeStyles({

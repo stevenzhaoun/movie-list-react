@@ -33,7 +33,7 @@ export const validateUser = (username, password, requestToken) => {
   return client.post('/authentication/token/validate_with_login', { username, password, request_token: requestToken });
 }
 
-export const getSession = (requestToken) => {
+export const createSession = (requestToken) => {
   return client.post(`/authentication/session/new`, { request_token: requestToken });
 }
 

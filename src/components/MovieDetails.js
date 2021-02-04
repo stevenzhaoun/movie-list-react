@@ -1,6 +1,6 @@
 import { Box, Button, Chip, MenuItem, Select, Typography } from '@material-ui/core';
 import React, { useState } from 'react'
-import { getImgUrl } from '../utils';
+import { getImgUrl } from '../apiServices';
 import StarIcon from '@material-ui/icons/Star';
 import _ from 'lodash';
 

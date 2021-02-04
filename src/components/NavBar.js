@@ -52,9 +52,9 @@ const NavBar = ({
           {user
             ? (
               <>
-                <Box onClick={handleClick}>{user.username}</Box>
+                <Box onClick={handleClick}>{user.userName}</Box>
                 <Menu
-                  id="simple-menu"
+                  id="user-menu"
                   anchorEl={anchorEl}
                   keepMounted
                   open={Boolean(anchorEl)}
