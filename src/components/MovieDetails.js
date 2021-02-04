@@ -5,6 +5,7 @@ import StarIcon from '@material-ui/icons/Star';
 import _ from 'lodash';
 
 const MovieDetails = ({
+  id,
   posterPath,
   title,
   releaseDate,
@@ -63,7 +64,7 @@ const MovieDetails = ({
                 {_.range(1, 11).map(num => <MenuItem key={num} value={num}>{num}</MenuItem>)}
               </Select>
               <Box ml={3}>
-                <Button variant="outlined" onClick={() => onRate(rateValue)}>Rate it!</Button>
+                <Button variant="outlined" onClick={() => onRate(id, rateValue)}>Rate it!</Button>
               </Box>
             </Box>
           </Box>
