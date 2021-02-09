@@ -1,30 +1,29 @@
-import { Box, Typography } from '@material-ui/core'
-import React, { useContext, useEffect, useState } from 'react'
-import { getUserMovies } from '../apiServices'
-import FavoriteMovesContext from '../contexts/FavoriteMovesContext'
+import { Box, CircularProgress, Typography } from '@material-ui/core'
+import React, { useEffect } from 'react'
 import useUser from '../hooks/useUser'
 import MovieList from './MovieList'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadFavoriteMovies } from '../slices/favoriteMoviesSlice'
 
 const FavoriteList = () => {
-  const [movies, setMovies] = useState([]);
-  const { favListMap } = useContext(FavoriteMovesContext)
   const { user } = useUser();
+  const dispatch = useDispatch();
+
+  const { movies, loading, favListMap } = useSelector(state => state.favList)
   useEffect(() => {
     if (!user) {
       return;
     }
-    getUserMovies(user.sessionId, user.userId, 'favorite').then(({ data }) => {
-      const { results } = data;
-      setMovies(results);
-    });
-  }, [user]);
+    dispatch(loadFavoriteMovies());
+  }, [user, dispatch]);
 
   const validList = movies.filter(movie => favListMap[movie.id]);
 
   return (
     <Box p={5}>
       <Typography variant={'h3'} align="center">Favorite list</Typography>
-      <MovieList movies={validList} />
+      {loading && <CircularProgress />}
+      {!loading && <MovieList movies={validList} />}
     </Box>
   )
 }

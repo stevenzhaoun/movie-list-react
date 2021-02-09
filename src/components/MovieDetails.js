@@ -75,7 +75,7 @@ const MovieDetails = ({
             {productionCompanies.map(company => {
               return (
                 <Box mr={2} key={company.id} display="flex" flexDirection="column" justifyContent="space-between">
-                  <img src={getImgUrl(company.logo_path)} width="50px" height="30" style={{ objectFit: 'cover' }} />
+                  <img alt={company.name} src={getImgUrl(company.logo_path)} width="50px" height="30" style={{ objectFit: 'cover' }} />
                   <Typography variant="body2">{company.name}</Typography>
                 </Box>)
             })}

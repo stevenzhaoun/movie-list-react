@@ -1,19 +1,19 @@
 import { Box, CircularProgress } from '@material-ui/core';
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
-import { getImgUrl, getMovieDetails, rateMovie } from '../apiServices';
+import { getImgUrl, getMovieDetails } from '../apiServices';
 import MovieDetails from '../components/MovieDetails';
 import SnackBar from '../components/SnackBar';
-import RatedMoviesContext from '../contexts/RatedMoviesContext';
 import useSnackBar from '../hooks/useSnackBar';
-import useUser from '../hooks/useUser';
+import { useDispatch, useSelector } from 'react-redux';
+import { rateMovieAction } from '../slices/ratedMoviesSlice';
 
 const MovieDetailsPage = () => {
   const { movieId } = useParams();
   const { showMessage, ...snackBarProps } = useSnackBar();
-  const { ratedListMap, setRatedListMap } = useContext(RatedMoviesContext);
+  const { ratedListMap } = useSelector(state => state.ratedList);
   const [movie, setMovie] = useState({});
-  const { user } = useUser();
+  const dispatch = useDispatch()
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     setLoading(true);
@@ -21,18 +21,13 @@ const MovieDetailsPage = () => {
       setMovie(data);
       setLoading(false);
     });
-  }, []);
+  }, [movieId, setLoading, setMovie]);
 
 
   const handleRate = (id, rating) => {
-    console.log(id, rating)
-    rateMovie(user.sessionId, id, rating).then(() => {
+    dispatch(rateMovieAction({ rating, movieId: id })).then(() => {
       showMessage('Rated success!!');
-      setRatedListMap({
-        ...ratedListMap,
-        [id]: rating
-      });
-    });
+    })
   }
   return (
     <Box p={5} display="flex" justifyContent='center' alignItems="center" mx={16}>

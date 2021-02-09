@@ -1,34 +1,38 @@
 import { Box, CircularProgress } from '@material-ui/core';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { loadHomeMoviesAction, setCategoryAction, setCurrentPageAction } from '../actions/homeMoviesActions';
 import CategorySelect from '../components/CategorySelect';
 import Pagination from '../components/Pagination';
-import useMovieList from '../hooks/useMovieList'
 import MovieList from './MovieList';
 
 const HomeMovieList = () => {
-  const [movies, setMovies] = useState([]);
-  const { loading, getMovies } = useMovieList();
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [category, setCategory] = useState('popular');
 
-  const loadMovies = (category, page) => {
-    getMovies(category, page).then(({ movies, totalPages }) => {
-      setMovies(movies);
-      setTotalPages(totalPages)
-    })
-  }
+  const dispatch = useDispatch();
+
+  const { loading, page, category, moviesMap, totalPages } = useSelector(state => state.homeMovies);
+
+  const hasMovies = moviesMap[category] && moviesMap[category][page];
+
+  const movies = hasMovies ? moviesMap[category] && moviesMap[category][page] : [];
+
+  const loadMovies = useCallback((category, page) => {
+    if (hasMovies) {
+      return;
+    }
+    dispatch(loadHomeMoviesAction(category, page));
+  }, [dispatch, hasMovies]);
 
   useEffect(() => {
     loadMovies(category, page);
-  }, []);
+  }, [loadMovies, category, page]);
 
   const handleNext = () => {
     if (page === totalPages) {
       return;
     }
     const newPage = page + 1;
-    setPage(newPage);
+    dispatch(setCurrentPageAction(newPage));
     loadMovies(category, newPage);
   }
 
@@ -37,13 +41,13 @@ const HomeMovieList = () => {
       return;
     }
     const newPage = page - 1;
-    setPage(newPage);
+    dispatch(setCurrentPageAction(newPage));
     loadMovies(category, newPage);
   }
 
   const handleCategoryChange = (category) => {
-    setCategory(category);
-    setPage(1);
+    dispatch(setCategoryAction(category));
+    dispatch(setCurrentPageAction(1));
     loadMovies(category, 1);
   }
 

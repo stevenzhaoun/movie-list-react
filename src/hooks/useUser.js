@@ -1,90 +1,54 @@
-import { useContext, useState } from "react"
-import { getRequestToken, validateUser, createSession, getUserAccount, getUserMovies } from "../apiServices";
-import FavoriteMovesContext from "../contexts/FavoriteMovesContext";
-import RatedMoviesContext from "../contexts/RatedMoviesContext";
-import UserContext from "../contexts/UserContext";
+import { useDispatch, useSelector } from 'react-redux'
+import { userLogin, userLogout, setUserInfo } from "../slices/userSlice";
+import { loadRatedMovies } from "../slices/ratedMoviesSlice";
+import { loadFavoriteMovies } from "../slices/favoriteMoviesSlice";
+import { useCallback } from 'react';
 
 
 
 const useUser = () => {
-  const { user, setUser } = useContext(UserContext);
-  const { setFavListMap } = useContext(FavoriteMovesContext);
-  const { setRatedListMap } = useContext(RatedMoviesContext);
-  const [loading, setLoading] = useState(false)
+  const { user, loading, error } = useSelector(state => state.user);
 
-  const loadUserMovies = (userInfo) => {
-    getUserMovies(userInfo.sessionId, userInfo.userId, 'favorite').then(({ data }) => {
-      const { results } = data;
-      const favMap = results.reduce((acc, movie) => {
-        acc[movie.id] = true
-        return acc;
-      }, {});
-      setFavListMap(favMap);
-    });
+  const dispatch = useDispatch();
 
-    getUserMovies(userInfo.sessionId, userInfo.userId, 'rated').then(({ data }) => {
-      const { results } = data;
-      const ratedMap = results.reduce((acc, movie) => {
-        acc[movie.id] = movie.rating
-        return acc;
-      }, {});
-      setRatedListMap(ratedMap);
-    });
-  }
+  const loadUserMovies = useCallback(() => {
+    dispatch(loadRatedMovies());
+    dispatch(loadFavoriteMovies());
+  }, [dispatch]);
 
   const login = (username, password) => {
-    setLoading(true);
-    return getRequestToken().then(({ data }) => {
-      const { request_token } = data
-      validateUser(username, password, request_token)
-        .then(() => {
-          createSession(request_token).then(({ data }) => {
-            const { session_id } = data;
-            getUserAccount(session_id).then(({ data }) => {
-              const { id, username } = data
-              const userInfo = {
-                requestToken: request_token,
-                sessionId: session_id,
-                userId: id,
-                userName: username
-              }
-              localStorage.setItem('user', JSON.stringify(userInfo));
-              setUser(userInfo);
-              setLoading(false);
-              return userInfo;
-            }).then((userInfo) => {
-              loadUserMovies(userInfo)
-            });
-          })
-        })
-    })
+    return dispatch(userLogin({ username, password })).then(({ payload }) => {
+      const userInfo = payload;
+      localStorage.setItem('user', JSON.stringify(userInfo));
+      return loadUserMovies(userInfo)
+    });
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('user');
-    setUser(null);
-  }
+    dispatch(userLogout());
+  }, [dispatch]);
 
-  const loadUserData = () => {
+  const loadUserData = useCallback(() => {
     const userDataStr = localStorage.getItem('user');
     if (userDataStr) {
       try {
         const userInfo = JSON.parse(userDataStr);
-        setUser(userInfo);
+        dispatch(setUserInfo(userInfo))
         loadUserMovies(userInfo);
       } catch (e) {
         console.log(e);
       }
     }
-  }
+  }, [dispatch, loadUserMovies])
 
   return {
     user,
     login,
-    setUser,
     loading,
     logout,
-    loadUserData
+    loadUserData,
+    error
   }
 }
 

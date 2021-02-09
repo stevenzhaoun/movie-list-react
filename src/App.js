@@ -12,7 +12,7 @@ function App() {
   const { loadUserData } = useUser();
   useEffect(() => {
     loadUserData()
-  }, []);
+  }, [loadUserData]);
   return (
     <div className="App">
       <Header />

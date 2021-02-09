@@ -1,17 +1,22 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useHistory } from 'react-router-dom'
-import { addMovieToFavorite, getImgUrl } from '../apiServices'
+import { getImgUrl } from '../apiServices'
 import MovieCard from '../components/MovieCard'
 import MovieGrid from '../components/MovieGrid'
-import FavoriteMovesContext from '../contexts/FavoriteMovesContext'
 import useUser from '../hooks/useUser'
+import { useDispatch, useSelector } from 'react-redux'
+import { toggleFavoriteMovie } from '../slices/favoriteMoviesSlice'
 
 const MovieList = ({
   movies
 }) => {
   const { user } = useUser();
-  const { favListMap, setFavListMap } = useContext(FavoriteMovesContext);
+  const { favListMap } = useSelector(state => state.favList);
+  const { ratedListMap } = useSelector(state => state.ratedList);
   const history = useHistory();
+
+  const dispatch = useDispatch();
+
   const handleTitleClick = (id) => {
     history.push(`/movies/${id}`);
   };
@@ -20,13 +25,7 @@ const MovieList = ({
     if (!user) {
       return;
     }
-    const { sessionId, accountId, } = user;
-    addMovieToFavorite(sessionId, accountId, id, !favListMap[id]).then(() => {
-      setFavListMap({
-        ...favListMap,
-        [id]: !favListMap[id]
-      })
-    })
+    dispatch(toggleFavoriteMovie({ isFav: !favListMap[id], movieId: id }))
   }
 
   return (
@@ -39,7 +38,7 @@ const MovieList = ({
             imgSrc={getImgUrl(movie.poster_path)}
             title={movie.title}
             rating={movie.vote_average}
-            myRating={movie.rating}
+            myRating={ratedListMap[movie.id]}
             favorite={Boolean(favListMap[movie.id])}
             onToggleFavorite={handleToggleFavorite}
             onTitleClick={handleTitleClick}
